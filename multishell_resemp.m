@@ -14,14 +14,27 @@ function multishell_resemp(img_nii,bval,bvec,out_bval_size,grad_dir_out,SH_order
 [path, filename, ext] = fileparts(img_nii);
 
 % Creating the brain mask
+if isempty(path)
+system(sprintf('bet %s brain -f 0.1 -m',img_nii));
+else
 system(sprintf('bet %s %s/brain -f 0.1 -m',img_nii,path));
+end
 
 % untar the brain mask file and atribute brain_mask variable
+if isempty(path)
+system(sprintf('gzip -d brain_mask.nii.gz'));
+brain_mask=strcat(path,'brain_mask.nii');
+else
 system(sprintf('gzip -d %s/brain_mask.nii.gz',path));
 brain_mask=strcat(path,'/brain_mask.nii');
+end
 
 % Remove unncessary files
+if isempty(path)
+system(sprintf('rm brain.nii.gz'));
+else
 system(sprintf('rm %s/brain.nii.gz',path));
+end
 
 %Determining the number of B0 in the DTI data
 numBvals=0;

@@ -41,6 +41,9 @@ matlab nohup -nodesktop -nodisplay -nosplash << EOF
  addpath(genpath('/home/k1510868/Documents/multishell/'));
  addpath(genpath('/home/k1510868/Documents/MATLAB/NBL_functions/'));
 
+ addpath(genpath('/home/antonio/Documents/GitProjects/multishell'));
+ addpath(genpath('/home/antonio/Documents/NBL/spherical_resamp/'));
+
  multishell_resemp('$INPUT_IMG','$BVAL','$BVEC',$NUM_B0,60,8);
 
 EOF
