@@ -29,7 +29,8 @@ MATRIX=$4
 NUM_B0=$5
 RESOLUTION=$6
 
-
+FILENAME=$(basename ${INPUT_IMG})
+FILENAME=${FILENAME%.*}
 
 echo ""
 echo "***** Phantom reconstruction *****"
@@ -37,8 +38,8 @@ echo ""
 
 echo "    ==> Resampling the gold standard data with Spherical Harmonics..."
 matlab nohup -nodesktop -nodisplay -nosplash << EOF
- addpath(genpath('/home/antonio/Documents/GitProjects/multishell/'));
- addpath(genpath('/home/antonio/Documents/NBL/spherical_resamp/'));
+ addpath(genpath('/home/k1510868/Documents/multishell/'));
+ addpath(genpath('/home/k1510868/Documents/MATLAB/NBL_functions/'));
 
  multishell_resemp('$INPUT_IMG','$BVAL','$BVEC',$NUM_B0,60,8);
 
@@ -119,11 +120,11 @@ for (( i = 0; i < $numMat; i++ )); do
 done
 
 # Create the final volume with ec distortions
- fslmerge -t dti_resamp_ec.nii.gz `cat tmp_filelist.txt`
+ fslmerge -t ${FILENAME}_ec.nii.gz `cat tmp_filelist.txt`
 
 #Removing unncessary files
 echo "    ==> Removing unncessary files (tmp, aff, brain_mask downsampled and resampled nii files)"
- rm aff* tmp* brain_mask.nii *_2mm.nii *_resamp.nii
+ rm aff* tmp* brain_mask.nii
 
 echo ""
 echo "***** Phantom reconstruction finished with success *****"

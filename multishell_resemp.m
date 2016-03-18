@@ -14,14 +14,14 @@ function multishell_resemp(img_nii,bval,bvec,out_bval_size,grad_dir_out,SH_order
 [path, filename, ext] = fileparts(img_nii);
 
 % Creating the brain mask
-system(sprintf('bet %s brain -f 0.1 -m',img_nii));
+system(sprintf('bet %s %s/brain -f 0.1 -m',img_nii,path));
 
 % untar the brain mask file and atribute brain_mask variable
-system(sprintf('gzip -d brain_mask.nii.gz'));
+system(sprintf('gzip -d %s/brain_mask.nii.gz',path));
 brain_mask=strcat(path,'/brain_mask.nii');
 
 % Remove unncessary files
-system(sprintf('rm brain.nii.gz'));
+system(sprintf('rm %s/brain.nii.gz',path));
 
 %Determining the number of B0 in the DTI data
 numBvals=0;
@@ -38,8 +38,11 @@ bvec_values(:,1:numBvals)=[];
 bvec_values=bvec_values';
 
 % SH resample
-NBL_SH_resample(img_nii,brain_mask,bvec_values,numBvals,strcat(path,'/',filename,'_resamp',ext),ndirez(grad_dir_out),SH_order);
-
+if isempty(path)
+    NBL_SH_resample(img_nii,brain_mask,bvec_values,numBvals,'tmp_resamp.nii',ndirez(grad_dir_out),SH_order);
+else
+    NBL_SH_resample(img_nii,brain_mask,bvec_values,numBvals,strcat(path,'/tmp_resamp.nii'),ndirez(grad_dir_out),SH_order);
+end
 % Save bvec and bval to the new resample data
 bval=load(bval);
 new_bval=zeros(1,out_bval_size+grad_dir_out);
@@ -50,12 +53,21 @@ for i=1:length(new_bval)
        new_bval(i)=bval(i+12);
     end
 end
-save(strcat(path,'/',filename,'_resamp.bval'),'new_bval','-ascii');
+
+if isempty(path)
+    save(strcat(filename,'_resamp.bval'),'new_bval','-ascii');
+else
+    save(strcat(path,'/',filename,'_resamp.bval'),'new_bval','-ascii');
+end
 new_bvec=zeros(out_bval_size+grad_dir_out,3);
 b1values=ndirez(grad_dir_out);
 new_bvec(out_bval_size+1:length(new_bvec),:)=b1values;
 new_bvec=new_bvec';
-save(strcat(path,'/',filename,'_resamp.bvec'),'new_bvec','-ascii');
+if isempty(path)
+    save(strcat(filename,'_resamp.bvec'),'new_bvec','-ascii');
+else
+    save(strcat(path,'/',filename,'_resamp.bvec'),'new_bvec','-ascii');
+end
 
 % Clear the variables
 % delete bvec bvec_values bval
