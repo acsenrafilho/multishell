@@ -1,0 +1,27 @@
+#!/bin/bash
+# Script to perform the ExploreDTI pipeline
+
+MAIN_PATH=$1
+DTI_VOL=$2
+BVAL=$3
+BVEC=$4
+T1_VOL=$5
+
+echo "  ==> getnandata: Copying DTI and T1 to /nandata "
+echo $DTI_VOL $MAIN_PATH
+cp $DTI_VOL "$MAIN_PATH/nandata/PHANTOM"
+
+
+# prepdti nandata dwidata PHNATOM HCP
+# prept1 -r MNI_2mm nandata dwidata PHANTOM MPRAGE
+# expdticorr -a -R -M -C –E dwidata expdtidata PHANTOM _SM_EC_EPI_robust
+
+
+
+# [k1510868@nanlnx1 ExploreDTI]1% getnandata /data/blinded/CRFCRFA/ nandata SAGAPILOT
+
+# [k1510868@nanlnx1 ExploreDTI]0% prepdti nandata dwidata SAGAPILOT DTI_2mm_60B1500
+
+# [k1510868@nanlnx1 ExploreDTI]0% prept1 -r MNI_2mm nandata dwidata SAGA MPRAGE
+
+# [k1510868@nanlnx1 ExploreDTI]0% expdticorr -a -R -M -C –E dwidata expdtidata SAGA _SM_EC_EPI_robust

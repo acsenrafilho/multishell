@@ -3,7 +3,7 @@
 
 usage(){
   echo "  Script to apply a eddy current distortion in a DTI data."
-  echo "  Usage: phantom_deformation <Input image> <Bval file> <Bvec file> <Distortion matrix> <Number of B0> <Spatial resolution (mm)>"
+  echo "  Usage: build_phantom <Input image> <Bval file> <Bvec file> <Distortion matrix> <Number of B0> <Spatial resolution (mm)>"
   echo ""
   echo "   Input image          = The DTI volume which you want to apply eddy current distortions."
   echo "   Bval file            = Bval file from the input image (.bval)."

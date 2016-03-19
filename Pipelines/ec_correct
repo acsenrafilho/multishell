@@ -1,0 +1,57 @@
+#!/bin/bash
+# Script pipeline to perform the comparison between ExploreDTI, Eddy and TORTOISE softwares
+
+usage(){
+  echo "  This scrip pipeline to perform the comparison between ExploreDTI, Eddy and TORTOISE softwares."
+  echo "  Usage: $(basename $0) <DTI volume> <Bval file> <Bvec file> <T1 volume> "
+  echo ""
+}
+
+if [[ $# -eq 0 ]]; then
+  usage
+  exit
+fi
+
+# Data
+DTI_VOL=$1
+BVAL=$2
+BVEC=$3
+T1_VOL=$4
+
+if [[ `ls ~ | grep "DTI_STUDY"` == "" ]]; then
+  mkdir ~/DTI_STUDY
+  mkdir ~/DTI_STUDY/TORTOISE
+  mkdir ~/DTI_STUDY/Eddy
+  mkdir ~/DTI_STUDY/ExploreDTI
+  mkdir ~/DTI_STUDY/ExploreDTI/nandata
+  mkdir ~/DTI_STUDY/ExploreDTI/nandata/PHANTOM
+  mkdir ~/DTI_STUDY/ExploreDTI/expdtidata
+  mkdir ~/DTI_STUDY/ExploreDTI/dwidata
+fi
+BASE_FOLDER="~/DTI_STUDY"
+EXPDTI_ROOT="$BASE_FOLDER/ExploreDTI"
+
+
+# Tomar de entrada: imagem phantom com e sem distorcai ec - Imagem sem distorcao eh a referencia
+# Aplicar o pipeline de processamento de cada um dos softwares
+# Calcular valores quantitativos da imagem residual (sub com e sem ec) - Emitir uma tabela com os valores ...ficar mais facil de plotar no Matlab ou Origin
+
+#========================================
+## Processing with ExploreDTI
+# Create folders template: nandata, dwidata and expdtidata
+# Copy simulated data into nandata/PHANTOM/*.nii.gz, *.bvec, *.bval and *.MPRAGE.nii.gz
+
+# Call pipeline scripts:
+source exploredti_pipeline $EXPDTI_ROOT $DTI_VOL $BVAL $BVEC $T1_VOL
+
+#========================================
+
+#========================================
+## Processing with TORTOISE prepvm
+#
+#========================================
+
+#========================================
+## Processing with TORTOISE dr_buddi_vm
+#
+#========================================
