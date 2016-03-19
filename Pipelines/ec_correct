@@ -33,7 +33,6 @@ EXPDTI_ROOT="$BASE_FOLDER/ExploreDTI"
 
 
 # Tomar de entrada: imagem phantom com e sem distorcai ec - Imagem sem distorcao eh a referencia
-# Aplicar o pipeline de processamento de cada um dos softwares
 # Calcular valores quantitativos da imagem residual (sub com e sem ec) - Emitir uma tabela com os valores ...ficar mais facil de plotar no Matlab ou Origin
 
 #========================================
