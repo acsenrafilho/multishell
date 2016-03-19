@@ -29,6 +29,11 @@ MATRIX=$4
 NUM_B0=$5
 RESOLUTION=$6
 
+if [[ "`ls ~ | grep tmp_multishell`" == "" ]]; then
+  mkdir ~/tmp_multishell
+fi
+TMP_PATH="`echo ~`/tmp_multishell/"
+FILEPATH=$(dirname $INPUT_IMG)
 FILENAME=$(basename ${INPUT_IMG})
 FILENAME=${FILENAME%.*}
 
@@ -44,44 +49,44 @@ matlab nohup -nodesktop -nodisplay -nosplash << EOF
  addpath(genpath('/home/antonio/Documents/GitProjects/multishell'));
  addpath(genpath('/home/antonio/Documents/NBL/spherical_resamp/'));
 
- multishell_resemp('$INPUT_IMG','$BVAL','$BVEC',$NUM_B0,60,8);
+ multishell_resemp('$TMP_PATH','$INPUT_IMG','$BVAL','$BVEC',$NUM_B0,60,8);
 
 EOF
 
 echo ""
 # Downsample to 2mm spatial resolution
 echo "    ==> Downsampling the data to $RESOLUTION mm..."
-INPUT_IMG=`ls *_resamp.nii`
-flirt -in $INPUT_IMG -ref $INPUT_IMG -out tmp_dti_${RESOLUTION}mm.nii -applyisoxfm $RESOLUTION
+  INPUT_IMG="${TMP_PATH}tmp_resamp.nii"
+flirt -in ${INPUT_IMG} -ref ${INPUT_IMG} -out ${TMP_PATH}tmp_dti_${RESOLUTION}mm.nii -applyisoxfm $RESOLUTION
 
 # Decompress the 2 mm image
- gzip -d tmp_dti_${RESOLUTION}mm.nii.gz
+ gzip -d "${TMP_PATH}tmp_dti_${RESOLUTION}mm.nii.gz"
 
 # Resetting the input image variable
-INPUT_IMG=tmp_dti_${RESOLUTION}mm.nii
+INPUT_IMG="${TMP_PATH}tmp_dti_${RESOLUTION}mm.nii"
 
 # Reducing the b0 volumes
-fslroi $INPUT_IMG tmp_cropDTI $((18-$NUM_B0)) -1
-INPUT_IMG=tmp_cropDTI.nii.gz
+fslroi $INPUT_IMG ${TMP_PATH}tmp_cropDTI $((18-$NUM_B0)) -1
+INPUT_IMG="${TMP_PATH}tmp_cropDTI.nii.gz"
 
 # Split the DTI volume in 3D volumes
 echo "    ==> Spliting 4D DTI volume to a series of 3D volumes... "
-fslsplit ${INPUT_IMG}.nii.gz tmp_vol_
+fslsplit ${INPUT_IMG}.nii.gz ${TMP_PATH}tmp_vol_
 
 # Cleaning eddy_correct matrix file to only matrix data
 echo "    ==> Formating matrix file..."
- cat $MATRIX | grep -v processing | grep -v Final | grep [[:alnum:]] > affine_4D.mat
+ cat $MATRIX | grep -v processing | grep -v Final | grep [[:alnum:]] > ${TMP_PATH}affine_4D.mat
 
 #MATLAB: split the affine_4D.mat file into several small affine matrix for each volumes
 matlab nohup -nodesktop -nodisplay -nosplash << EOF
-table=load('affine_4D.mat','-ascii');
+table=load('${TMP_PATH}affine_4D.mat','-ascii');
 
 rows=length(table);
 out_table=zeros(4,4);
 count=0;
 for i=1:4:rows
         out_table=table(1*i:1*(i+3),:);
-        save(sprintf('aff_%d.mat',count),'out_table','-ascii');
+        save(sprintf('${TMP_PATH}aff_%d.mat',count),'out_table','-ascii');
         count=count+1;
 end
 EOF
@@ -94,40 +99,41 @@ sizem=4
 count=1
 while read line; do
   ((count++))
-done < affine_4D.mat
+done < ${TMP_PATH}affine_4D.mat
 
 numMat=`echo $(($count/$sizem))`
 for (( i = 0; i < $numMat; i++ )); do
   if [[ $i -lt 10 ]]; then
     echo "--> Applying transformation in volume $i"
-    flirt -in tmp_vol_000$i.nii.gz -ref tmp_vol_000$i.nii.gz -init aff_$i.mat -out tmp_vol_000${i}_aff.nii.gz -applyxfm
+    flirt -in ${TMP_PATH}tmp_vol_000$i.nii.gz -ref ${TMP_PATH}tmp_vol_000$i.nii.gz -init ${TMP_PATH}aff_$i.mat -out ${TMP_PATH}tmp_vol_000${i}_aff.nii.gz -applyxfm
   elif [[ $i -lt 100 && $i -ge 10 ]]; then
     echo "--> Applying transformation in volume $i"
-    flirt -in tmp_vol_00$i.nii.gz -ref tmp_vol_00$i.nii.gz -init aff_$i.mat -out tmp_vol_00${i}_aff.nii.gz -applyxfm
+    flirt -in ${TMP_PATH}tmp_vol_00$i.nii.gz -ref ${TMP_PATH}tmp_vol_00$i.nii.gz -init ${TMP_PATH}aff_$i.mat -out ${TMP_PATH}tmp_vol_00${i}_aff.nii.gz -applyxfm
   elif [[ $i -lt 1000 && $i -ge 100 ]]; then
     echo "--> Applying transformation in volume $i"
-    flirt -in tmp_vol_0$i.nii.gz -ref tmp_vol_0$i.nii.gz -init aff_$i.mat -out tmp_vol_0${i}_aff.nii.gz -applyxfm
+    flirt -in ${TMP_PATH}tmp_vol_0$i.nii.gz -ref ${TMP_PATH}tmp_vol_0$i.nii.gz -init ${TMP_PATH}aff_$i.mat -out ${TMP_PATH}tmp_vol_0${i}_aff.nii.gz -applyxfm
   fi
 done
 
-#Reconstructing the resampled+distorted volume
+# Reconstructing the resampled+distorted volume
 echo "    ==> Reconstructing the final DTI volume with eddy current distortions..."
+VOLUMES=""
 for (( i = 0; i < $numMat; i++ )); do
   if [[ $i -lt 10 ]]; then
-    echo "tmp_vol_000${i}_aff.nii.gz " >> tmp_filelist.txt
+    VOLUMES="$VOLUMES `echo "${TMP_PATH}tmp_vol_000${i}_aff.nii.gz "`"
   elif [[ $i -lt 100 && $i -ge 10 ]]; then
-    echo "tmp_vol_00${i}_aff.nii.gz " >> tmp_filelist.txt
+    VOLUMES="$VOLUMES `echo "${TMP_PATH}tmp_vol_00${i}_aff.nii.gz "`"
   elif [[ $i -lt 1000 && $i -ge 100 ]]; then
-    echo "tmp_vol_0${i}_aff.nii.gz " >> tmp_filelist.txt
+    VOLUMES="$VOLUMES `echo "${TMP_PATH}tmp_vol_0${i}_aff.nii.gz "`"
   fi
 done
 
 # Create the final volume with ec distortions
- fslmerge -t ${FILENAME}_ec.nii.gz `cat tmp_filelist.txt`
-
+ fslmerge -t ${TMP_PATH}${FILENAME}_ec.nii.gz $VOLUMES
 #Removing unncessary files
 echo "    ==> Removing unncessary files (tmp, aff, brain_mask downsampled and resampled nii files)"
- rm aff* tmp* brain_mask.nii
+  cp ${TMP_PATH}${FILENAME}* ${FILEPATH}
+ rm -R ${TMP_PATH}
 
 echo ""
 echo "***** Phantom reconstruction finished with success *****"
