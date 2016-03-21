@@ -3,52 +3,68 @@
 
 usage(){
   echo "  This scrip pipeline to perform the comparison between ExploreDTI, Eddy and TORTOISE softwares."
-  echo "  Usage: $(basename $0) <DTI volume> <Bval file> <Bvec file> <T1 volume> "
+  echo "  Usage: $(basename $0) <DTI volume> <T1 volume> <Type of experiment [eddy,tortoise,exploredti]>"
   echo ""
 }
 
 if [[ $# -eq 0 ]]; then
   usage
   exit
+elif [[ $# -lt 3 ]]; then
+  usage
+  exit
 fi
 
 # Data
 DTI_VOL=$1
-BVAL=$2
-BVEC=$3
-T1_VOL=$4
+T1_VOL=$2
+TYPE_EXP=$3
+
+HOME_PATH=`echo ~`
 
 if [[ `ls ~ | grep "DTI_STUDY"` == "" ]]; then
-  mkdir ~/DTI_STUDY
-  mkdir ~/DTI_STUDY/TORTOISE
-  mkdir ~/DTI_STUDY/Eddy
-  mkdir ~/DTI_STUDY/ExploreDTI
-  mkdir ~/DTI_STUDY/ExploreDTI/nandata
-  mkdir ~/DTI_STUDY/ExploreDTI/nandata/PHANTOM
-  mkdir ~/DTI_STUDY/ExploreDTI/expdtidata
-  mkdir ~/DTI_STUDY/ExploreDTI/dwidata
+
+  mkdir ${HOME_PATH}/DTI_STUDY
+  mkdir ${HOME_PATH}/DTI_STUDY/TORTOISE
+  mkdir ${HOME_PATH}/DTI_STUDY/Eddy
+  mkdir ${HOME_PATH}/DTI_STUDY/ExploreDTI
+  mkdir ${HOME_PATH}/DTI_STUDY/ExploreDTI/nandata
+  mkdir ${HOME_PATH}/DTI_STUDY/ExploreDTI/expdtidata
+  mkdir ${HOME_PATH}/DTI_STUDY/ExploreDTI/dwidata
 fi
-BASE_FOLDER="~/DTI_STUDY"
-EXPDTI_ROOT="$BASE_FOLDER/ExploreDTI"
+BASE_FOLDER="$HOME_PATH/DTI_STUDY"
 
 
 # Tomar de entrada: imagem phantom com e sem distorcai ec - Imagem sem distorcao eh a referencia
 # Calcular valores quantitativos da imagem residual (sub com e sem ec) - Emitir uma tabela com os valores ...ficar mais facil de plotar no Matlab ou Origin
 
-#========================================
-## Processing with ExploreDTI
-# Create folders template: nandata, dwidata and expdtidata
-# Copy simulated data into nandata/PHANTOM/*.nii.gz, *.bvec, *.bval and *.MPRAGE.nii.gz
-
-# Call pipeline scripts:
-source exploredti_pipeline $EXPDTI_ROOT $DTI_VOL $BVAL $BVEC $T1_VOL
-
-#========================================
-
+# if [[ "$TYPE_EXP" == "eddy" ]]; then
+# #========================================
+# ## Processing with EDDY
+# #
+# #========================================
+# elif [[ "$TYPE_EXP" == "tortoise" ]]; then
 #========================================
 ## Processing with TORTOISE prepvm
-#
+# Copy simulated data into /*.nii, *.bvec, *.bval and *.MPRAGE.nii
+TORTOISE_ROOT="$BASE_FOLDER/TORTOISE"
+source tortoise_prepvm $TORTOISE_ROOT $DTI_VOL $T1_VOL
 #========================================
+# elif [[ "$TYPE_EXP" == "exploredti" ]]; then
+# #========================================
+# ## Processing with ExploreDTI
+# # Create folders template: nandata, dwidata and expdtidata
+# # Copy simulated data into nandata/PHANTOM/*.nii.gz, *.bvec, *.bval and *.MPRAGE.nii.gz
+#
+# # Call pipeline scripts:
+# EXPDTI_ROOT="$BASE_FOLDER/ExploreDTI"
+# source exploredti_pipeline $EXPDTI_ROOT $DTI_VOL $T1_VOL
+# #========================================
+# fi
+
+
+
+
 
 #========================================
 ## Processing with TORTOISE dr_buddi_vm

@@ -3,34 +3,27 @@
 
 MAIN_PATH=$1
 DTI_VOL=$2
-BVAL=$3
-BVEC=$4
-T1_VOL=$5
+T1_VOL=$3
 
-echo "  ==> getnandata: Copying DTI and T1 to /nandata "
-echo ${DTI_VOL%.*.*} $MAIN_PATH
-# echo $(basename ${DTI_VOL%.*.*}) $MAIN_PATH
-# cp ${DTI_VOL%.*.*}.nii.gz $MAIN_PATH/nandata/PHANTOM
-# cp ${DTI_VOL%.*.*}.bval $MAIN_PATH/nandata/PHANTOM
-# cp ${DTI_VOL%.*.*}.bvec $MAIN_PATH/nandata/PHANTOM
+IMAGE_MAINPATH=$(dirname ${DTI_VOL})
+MAIN_FOLDER=$(basename ${DTI_VOL%.*.*})
+
+#Creating folder to this specific experiment
+mkdir ${MAIN_PATH}/nandata/$(basename ${DTI_VOL%.*.*})
+
+#echo "  ==> getnandata: Copying DTI and T1 to /nandata "
+ #cp ${DTI_VOL} $MAIN_PATH/nandata/$MAIN_FOLDER
+ #cp $IMAGE_MAINPATH/$(basename ${DTI_VOL%.*.*}).bval $MAIN_PATH/nandata/$MAIN_FOLDER
+ #cp $IMAGE_MAINPATH/$(basename ${DTI_VOL%.*.*}).bvec $MAIN_PATH/nandata/$MAIN_FOLDER
+ #cp $T1_VOL $MAIN_PATH/nandata/$MAIN_FOLDER
 
 echo "  ==> prepdti: Preparing DTI data to /dwidata "
-# prepdti nandata dwidata PHANTOM HCP
+#prepdti ${MAIN_PATH}/nandata ${MAIN_PATH}/dwidata $MAIN_FOLDER HCP
 
 echo "  ==> prept1: Preparing T1 data to /dwidata "
-echo "    --> Step 1: Normalize T1 to MNI152"
-# ESCREVER COREGISTRO ENTRE T1 COM MNI. RENOMEAR COM O MESMO NOME COMO MNI_MPRAGE
+#prept1 -r MNI_2mm ${MAIN_PATH}/nandata ${MAIN_PATH}/dwidata $MAIN_FOLDER MPRAGE
 
-echo "    --> Step 2: Run ExploreDTI T1 preparation pipeline"
-# prept1 -r MNI_2mm nandata dwidata PHANTOM MPRAGE
-# expdticorr -a -R -M -C –E dwidata expdtidata PHANTOM _SM_EC_EPI_robust
+echo "  ==> expdticorr: Running the eddy correction procedure "
+expdticorr -a -R -M -C -E ${MAIN_PATH}/dwidata ${MAIN_PATH}/expdtidata $MAIN_FOLDER _SM_EC_EPI_robust
 
-
-
-# [k1510868@nanlnx1 ExploreDTI]1% getnandata /data/blinded/CRFCRFA/ nandata SAGAPILOT
-
-# [k1510868@nanlnx1 ExploreDTI]0% prepdti nandata dwidata SAGAPILOT DTI_2mm_60B1500
-
-# [k1510868@nanlnx1 ExploreDTI]0% prept1 -r MNI_2mm nandata dwidata SAGA MPRAGE
-
-# [k1510868@nanlnx1 ExploreDTI]0% expdticorr -a -R -M -C –E dwidata expdtidata SAGA _SM_EC_EPI_robust
+#CHAMAR METODO PARA CALCULAR MELHORA DA CORRECAO...IMAGEM RESIDUAL E METRICAS EM CIMA DISSO
