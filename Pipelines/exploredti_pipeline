@@ -8,13 +8,16 @@ BVEC=$4
 T1_VOL=$5
 
 echo "  ==> getnandata: Copying DTI and T1 to /nandata "
-echo $DTI_VOL $MAIN_PATH
-cp $DTI_VOL "$MAIN_PATH/nandata/PHANTOM"
+echo ${DTI_VOL%.*.*} $MAIN_PATH
+# echo $(basename ${DTI_VOL%.*.*}) $MAIN_PATH
+# cp ${DTI_VOL%.*.*}.nii.gz $MAIN_PATH/nandata/PHANTOM
+# cp ${DTI_VOL%.*.*}.bval $MAIN_PATH/nandata/PHANTOM
+# cp ${DTI_VOL%.*.*}.bvec $MAIN_PATH/nandata/PHANTOM
 
-echo "  ==> prepdti: Prepareing DTI data to /dwidata "
+echo "  ==> prepdti: Preparing DTI data to /dwidata "
 # prepdti nandata dwidata PHANTOM HCP
 
-echo "  ==> prept1: Prepareing T1 data to /dwidata "
+echo "  ==> prept1: Preparing T1 data to /dwidata "
 echo "    --> Step 1: Normalize T1 to MNI152"
 # ESCREVER COREGISTRO ENTRE T1 COM MNI. RENOMEAR COM O MESMO NOME COMO MNI_MPRAGE
 
