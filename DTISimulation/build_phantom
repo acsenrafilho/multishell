@@ -68,6 +68,9 @@ INPUT_IMG="${TMP_PATH}tmp_dti_${RESOLUTION}mm.nii"
 # Reducing the b0 volumes
 fslroi $INPUT_IMG ${TMP_PATH}tmp_cropDTI $((18-$NUM_B0)) -1
 INPUT_IMG="${TMP_PATH}tmp_cropDTI.nii.gz"
+# Copy the croped image to main folder (This is the gold standard image)
+cp ${TMP_PATH}tmp_cropDTI.nii.gz ${FILEPATH}
+mv ${FILEPATH}/tmp_cropDTI.nii.gz ${FILEPATH}/${FILENAME}_resamp.nii.gz
 
 # Split the DTI volume in 3D volumes
 echo "    ==> Spliting 4D DTI volume to a series of 3D volumes... "
@@ -133,8 +136,6 @@ done
 #Removing unncessary files
 echo "    ==> Removing unncessary files (tmp, aff, brain_mask downsampled and resampled nii files)"
   cp ${TMP_PATH}${FILENAME}* ${FILEPATH}
-  cp ${TMP_PATH}/tmp_resamp.nii ${FILEPATH}
-  mv ${FILEPATH}/tmp_resamp.nii ${FILEPATH}/${FILENAME}_resamp.nii
  rm -R ${TMP_PATH}
 
 echo ""
