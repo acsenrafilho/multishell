@@ -11,8 +11,14 @@ echo "  ==> getnandata: Copying DTI and T1 to /nandata "
 echo $DTI_VOL $MAIN_PATH
 cp $DTI_VOL "$MAIN_PATH/nandata/PHANTOM"
 
+echo "  ==> prepdti: Prepareing DTI data to /dwidata "
+# prepdti nandata dwidata PHANTOM HCP
 
-# prepdti nandata dwidata PHNATOM HCP
+echo "  ==> prept1: Prepareing T1 data to /dwidata "
+echo "    --> Step 1: Normalize T1 to MNI152"
+# ESCREVER COREGISTRO ENTRE T1 COM MNI. RENOMEAR COM O MESMO NOME COMO MNI_MPRAGE
+
+echo "    --> Step 2: Run ExploreDTI T1 preparation pipeline"
 # prept1 -r MNI_2mm nandata dwidata PHANTOM MPRAGE
 # expdticorr -a -R -M -C –E dwidata expdtidata PHANTOM _SM_EC_EPI_robust
 
