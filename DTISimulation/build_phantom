@@ -133,6 +133,8 @@ done
 #Removing unncessary files
 echo "    ==> Removing unncessary files (tmp, aff, brain_mask downsampled and resampled nii files)"
   cp ${TMP_PATH}${FILENAME}* ${FILEPATH}
+  cp ${TMP_PATH}/tmp_resamp.nii ${FILEPATH}
+  mv ${FILEPATH}/tmp_resamp.nii ${FILEPATH}/dti_std.nii
  rm -R ${TMP_PATH}
 
 echo ""
