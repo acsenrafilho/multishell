@@ -1,21 +1,30 @@
 #!/bin/bash
-# Script to perorm TORTOISE eddy correction
+# Script to perorm TORTOISE correction
 
 MAIN_PATH=$1
 DTI_VOL=$2
 T1_VOL=$3
 
 IMAGE_MAINPATH=$(dirname ${DTI_VOL})
-MAIN_FOLDER=$(basename ${DTI_VOL%.*})
+MAIN_FOLDER=$(basename ${DTI_VOL%.*.*})
 
 #Creating folder to this specific experiment
-# mkdir ${MAIN_PATH}/$(basename ${DTI_VOL%.*.*})
+mkdir ${MAIN_PATH}/$(basename ${DTI_VOL%.*.*})
 
 echo "  ==> Copying DTI, T1 and .xml data "
- cp ${DTI_VOL} $MAIN_PATH/
- cp $IMAGE_MAINPATH/$(basename ${DTI_VOL%.*}).bval $MAIN_PATH/
- cp $IMAGE_MAINPATH/$(basename ${DTI_VOL%.*}).bvec $MAIN_PATH/
- cp $T1_VOL $MAIN_PATH/
+ cp ${DTI_VOL} $MAIN_PATH/$(basename ${DTI_VOL%.*.*})
+ cp $IMAGE_MAINPATH/$(basename ${DTI_VOL%.*.*}).bval $MAIN_PATH/$(basename ${DTI_VOL%.*.*})
+ cp $IMAGE_MAINPATH/$(basename ${DTI_VOL%.*.*}).bvec $MAIN_PATH/$(basename ${DTI_VOL%.*.*})
+ cp $T1_VOL $MAIN_PATH/$(basename ${DTI_VOL%.*.*})
+
+# Unzip the data
+gzip -d $MAIN_PATH/$(basename ${DTI_VOL%.*.*})/*.gz
 
 # Change the .dmc file parameters to the file name
 #echo "	==> Adapting .xml file "
+
+
+
+echo "	==> Running TORTOISE..."
+# Calling IDL with the .pro script
+/software/system/tortoise/tortoise_v2.1.0/idl82/bin/idl IDL/prepvm_HCP_resamp.pro

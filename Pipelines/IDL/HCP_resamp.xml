@@ -1,0 +1,90 @@
+<!-- DTI data properties file-->
+<!-- do not remove the above comment line -->
+
+
+<!--***************************************************************************-->
+<!-- Path to the PROCBASE. The folder containing the data, list files, path file and bmatrix file-->
+<PROCBASE>/home/k1510868/DTI_STUDY/TORTOISE/</PROCBASE>
+
+
+<!--***************************************************************************-->
+<!-- Path to the structural filename-->
+<STRUCTURAL_FILENAME>/home/k1510868/DTI_STUDY/TORTOISE/0005_SAG_ADNI_GO_ACC_MPRAGE_1_brain.nii</STRUCTURAL_FILENAME>
+
+
+<!--***************************************************************************-->
+<!-- Reslice and reorient the structural image?-->
+<reorient_structural>on</reorient_structural>
+
+
+<!--***************************************************************************-->
+<!-- Flip the structural image vertically?-->
+<flip_structural_vertical>off</flip_structural_vertical>
+
+
+<!--***************************************************************************-->
+<!-- Root name of the list file. It has to be in PROCBASE folder-->
+<list_root_filename>DTI_2mm_60B1500.list</list_root_filename>
+
+
+<!--***************************************************************************-->
+<!-- Name of the registration file to be used-->
+<registration_filename>reg_phantom.dmc</registration_filename>
+
+
+<!--***************************************************************************-->
+<!-- Name of the mecc_settings file to be used-->
+<mecc_settings_filename>Humanbrain/quadratictransformations</mecc_settings_filename>
+
+
+<!--***************************************************************************-->
+<!--A tag for specifying if the data is brain or a phantom/other type of data -->
+<!--If it is not brain data, skull stripping will be omited in various functions of the code. -->
+<!--Values are yes/no-->
+<is_brain_data>yes</is_brain_data>
+
+
+<!--***************************************************************************-->
+<!--A tag for enabling registered images and the status window to be displayed real time and-->
+<!--Values are yes/no-->
+<display_UI>no</display_UI>
+
+
+<!--***************************************************************************-->
+<!-- Path to the template filename. OPTIONAL.. If not provided, the software will look for -->
+<!-- a file with listfile name with _b0_orig_crop or _ b0_orig at the end.-->
+<TEMPLATE_FILENAME></TEMPLATE_FILENAME>
+
+
+<!--***************************************************************************-->
+<!-- Full filename of the final that will be used for the final reorientation of the data. -->
+<!-- . OPTIONAL.. If not provided, the software will use the structural image for this purpose.-->
+<REORIENTATION_FILENAME></REORIENTATION_FILENAME>
+
+
+<!--***************************************************************************-->
+<!-- Upsampled images name. If automatic upsampling is used and the user wants to anonymize the data, enter a name here-->
+<!-- Not mandatory. Currently commented out to use the automatically generated name-->
+<upsample_name></upsample_name>
+
+
+<!--***************************************************************************-->
+<!-- B0 noise mean-->
+<B0_noise_mean>0.0000000</B0_noise_mean>
+
+
+<!--***************************************************************************-->
+<!-- B0 noise standard deviation-->
+<B0_noise_stdev>0.0000000</B0_noise_stdev>
+
+
+<!--***************************************************************************-->
+<!-- structural noise mean-->
+<structural_noise_mean>0.0000000</structural_noise_mean>
+
+
+<!--***************************************************************************-->
+<!-- structural noise standard deviation-->
+<structural_noise_stdev>0.0000000</structural_noise_stdev>
+
+

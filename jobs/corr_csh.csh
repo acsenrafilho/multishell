@@ -1,0 +1,20 @@
+#!/bin/csh
+
+set HOME="`echo ~`"
+set HCP="/Data/multishell"
+set SAGA="/Data/SAGAPILOT01A/NIFTI/000571"
+set PIPELINES="/Documents/multishell/Pipelines"
+
+# Enter the pipelines scripts folder
+cd $HOME/$PIPELINES
+
+foreach list ( `ls $HOME/$HCP | grep _ec.nii.gz`  )
+  set DTI_VOL="$HOME/$HCP/$list"
+  set T1_VOL="`ls $HOME/$SAGA | grep MPRAGE`"
+  echo "	Calling EDDY pipeline for $list "
+  #./ec_correct $DTI_VOL $T1_VOL "eddy"
+
+  echo "	Calling ExploreDTI pipeline for $list"
+  #./ec_correct $DTI_VOL $T1_VOL "exploredti"
+end
+

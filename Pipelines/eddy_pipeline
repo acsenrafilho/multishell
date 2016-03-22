@@ -1,0 +1,60 @@
+#!/bin/bash
+# Script to perform the ExploreDTI pipeline
+
+MAIN_PATH=$1
+DTI_VOL=$2
+
+IMAGE_MAINPATH=$(dirname ${DTI_VOL})
+IMAGE_NAME=$(basename ${DTI_VOL%.*.*})
+
+  echo "  ==> Copying DTI data"
+  cp ${DTI_VOL} $MAIN_PATH/
+  cp $IMAGE_MAINPATH/$IMAGE_NAME.bval $MAIN_PATH/
+  cp $IMAGE_MAINPATH/$IMAGE_NAME.bvec $MAIN_PATH/
+
+  echo "  ==> Running EDDY"
+  echo ""
+ 
+  #Setting the input variables to FSL-Eddy
+  INPUT_IMG="$MAIN_PATH/${IMAGE_NAME}.nii.gz"
+  BRAIN_MASK="$MAIN_PATH/${IMAGE_NAME}_brain_mask.nii.gz"
+  BVEC="$MAIN_PATH/${IMAGE_NAME}.bvec"
+  BVAL="$MAIN_PATH/${IMAGE_NAME}.bval"
+  OUTPUT_IMG="$MAIN_PATH/${IMAGE_NAME}_eddy.nii.gz"
+
+  # Brain extraction
+  bet $INPUT_IMG $MAIN_PATH/${IMAGE_NAME}_brain -m -f 0.35
+
+  # Preparing ACQ_PARAM file:
+  #Read variables form config file
+  #ACQ_PE=`cat config/config_var.conf | grep ACQ_PE | cut -c8-10`
+  ACQ_PE="+Y"
+
+  # Number of volumes
+  NUM_VOL=`fslnvols $MAIN_PATH/${IMAGE_NAME}.nii.gz`
+  case $ACQ_PE in
+    "+Y" )
+      echo "      --> Creating acquisition file: +Y PE"
+      for (( i = 0; i < $NUM_VOL; i++ )); do
+        echo "0 1 0 0.075" >> $MAIN_PATH/acqparam_${IMAGE_NAME}.txt
+      done
+      ;;
+    "-Y" )
+      echo "      --> Creating acquisition file: -Y PE"
+      ;;
+  esac
+  ACQ_PARAM="$MAIN_PATH/acqparam_${IMAGE_NAME}.txt"
+
+  # Preparing the INDEX file:
+  indx=""
+  for (( i = 1; i <= $NUM_VOL; i++ )); do
+    indx="$indx 1"
+  done
+  echo $indx > $MAIN_PATH/eddy_index.txt
+  INDEX="$MAIN_PATH/eddy_index.txt"
+
+  # Running FSL-EDDY
+	echo "      --> FSL-EDDY"
+  eddy --imain=$INPUT_IMG --mask=$BRAIN_MASK --index=$MAIN_PATH/eddy_index.txt --acqp=$MAIN_PATH/acqparam_${IMAGE_NAME}.txt --bvecs=$BVEC --bvals=$BVAL --out=$OUTPUT_IMG
+
+

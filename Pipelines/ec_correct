@@ -22,8 +22,7 @@ TYPE_EXP=$3
 
 HOME_PATH=`echo ~`
 
-if [[ `ls ~ | grep "DTI_STUDY"` == "" ]]; then
-
+if [[ `ls ~ | grep "DTI_STUDY"` == "" ]]; then  
   mkdir ${HOME_PATH}/DTI_STUDY
   mkdir ${HOME_PATH}/DTI_STUDY/TORTOISE
   mkdir ${HOME_PATH}/DTI_STUDY/Eddy
@@ -38,33 +37,23 @@ BASE_FOLDER="$HOME_PATH/DTI_STUDY"
 # Tomar de entrada: imagem phantom com e sem distorcai ec - Imagem sem distorcao eh a referencia
 # Calcular valores quantitativos da imagem residual (sub com e sem ec) - Emitir uma tabela com os valores ...ficar mais facil de plotar no Matlab ou Origin
 
-# if [[ "$TYPE_EXP" == "eddy" ]]; then
-# #========================================
-# ## Processing with EDDY
-# #
-# #========================================
-# elif [[ "$TYPE_EXP" == "tortoise" ]]; then
-#========================================
-## Processing with TORTOISE prepvm
-# Copy simulated data into /*.nii, *.bvec, *.bval and *.MPRAGE.nii
-TORTOISE_ROOT="$BASE_FOLDER/TORTOISE"
-source tortoise_prepvm $TORTOISE_ROOT $DTI_VOL $T1_VOL
-#========================================
-# elif [[ "$TYPE_EXP" == "exploredti" ]]; then
-# #========================================
-# ## Processing with ExploreDTI
-# # Create folders template: nandata, dwidata and expdtidata
-# # Copy simulated data into nandata/PHANTOM/*.nii.gz, *.bvec, *.bval and *.MPRAGE.nii.gz
-#
-# # Call pipeline scripts:
-# EXPDTI_ROOT="$BASE_FOLDER/ExploreDTI"
-# source exploredti_pipeline $EXPDTI_ROOT $DTI_VOL $T1_VOL
-# #========================================
-# fi
-
-
-
-
+case $TYPE_EXP in
+  "eddy" )
+	echo "	==> Performing EDDY correction pipeline..."
+	EDDY_ROOT="$BASE_FOLDER/Eddy"
+	source eddy_pipeline $EDDY_ROOT $DTI_VOL
+    ;;
+  "tortoise" )
+	echo "	==> Performing TORTOISE correction pipeline..."
+	TORTOISE_ROOT="$BASE_FOLDER/TORTOISE"
+	source tortoise_prepvm $TORTOISE_ROOT $DTI_VOL $T1_VOL
+    ;;
+  "exploredti" )
+	echo "	==> Performing ExploreDTI correction pipeline..."
+	EXPDTI_ROOT="$BASE_FOLDER/ExploreDTI"
+	source exploredti_pipeline $EXPDTI_ROOT $DTI_VOL $T1_VOL
+    ;;
+esac
 
 #========================================
 ## Processing with TORTOISE dr_buddi_vm

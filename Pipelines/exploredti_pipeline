@@ -11,19 +11,19 @@ MAIN_FOLDER=$(basename ${DTI_VOL%.*.*})
 #Creating folder to this specific experiment
 mkdir ${MAIN_PATH}/nandata/$(basename ${DTI_VOL%.*.*})
 
-#echo "  ==> getnandata: Copying DTI and T1 to /nandata "
- #cp ${DTI_VOL} $MAIN_PATH/nandata/$MAIN_FOLDER
- #cp $IMAGE_MAINPATH/$(basename ${DTI_VOL%.*.*}).bval $MAIN_PATH/nandata/$MAIN_FOLDER
- #cp $IMAGE_MAINPATH/$(basename ${DTI_VOL%.*.*}).bvec $MAIN_PATH/nandata/$MAIN_FOLDER
- #cp $T1_VOL $MAIN_PATH/nandata/$MAIN_FOLDER
+echo "  ==> getnandata: Copying DTI and T1 to /nandata "
+cp ${DTI_VOL} $MAIN_PATH/nandata/$MAIN_FOLDER
+cp $IMAGE_MAINPATH/$(basename ${DTI_VOL%.*.*}).bval $MAIN_PATH/nandata/$MAIN_FOLDER
+cp $IMAGE_MAINPATH/$(basename ${DTI_VOL%.*.*}).bvec $MAIN_PATH/nandata/$MAIN_FOLDER
+cp $T1_VOL $MAIN_PATH/nandata/$MAIN_FOLDER
 
 echo "  ==> prepdti: Preparing DTI data to /dwidata "
-#prepdti ${MAIN_PATH}/nandata ${MAIN_PATH}/dwidata $MAIN_FOLDER HCP
+prepdti ${MAIN_PATH}/nandata ${MAIN_PATH}/dwidata $MAIN_FOLDER HCP
 
 echo "  ==> prept1: Preparing T1 data to /dwidata "
-#prept1 -r MNI_2mm ${MAIN_PATH}/nandata ${MAIN_PATH}/dwidata $MAIN_FOLDER MPRAGE
+prept1 -r MNI_2mm ${MAIN_PATH}/nandata ${MAIN_PATH}/dwidata $MAIN_FOLDER MPRAGE
 
 echo "  ==> expdticorr: Running the eddy correction procedure "
-expdticorr -a -R -M -C -E ${MAIN_PATH}/dwidata ${MAIN_PATH}/expdtidata $MAIN_FOLDER _SM_EC_EPI_robust
+expdticorr -a -R -M -C -E ${MAIN_PATH}/dwidata ${MAIN_PATH}/expdtidata $MAIN_FOLDER _expDTI
 
 #CHAMAR METODO PARA CALCULAR MELHORA DA CORRECAO...IMAGEM RESIDUAL E METRICAS EM CIMA DISSO
