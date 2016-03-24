@@ -1,0 +1,104 @@
+#!/bin/bash
+# Script to calculate the residual values for each slice in each volume of DTI data.
+
+usage(){
+  echo "  Script to calculate the residual values for each slice in each volume of DTI data."
+  echo "  The results table is placed in the current directory location."
+  echo "    Usage: $(basename $0) <DTI volume> <Name of table>"
+  echo ""
+}
+
+if [[ $# -lt 2 ]]; then
+  usage
+  exit
+fi
+
+# Usually, ~/DTI_STUDY/results/residual
+DTI_DATA=$1
+TABLE=$2
+
+# Split the data in 3D volumes
+echo "Spliting data in 3D volumes"
+fslsplit $DTI_DATA dtivol_ -t
+
+echo "Calculating the residual table..."
+# Number of volumes
+NUM_VOLS=`fslnvols $DTI_DATA`
+# Number of slices per volume
+fslsplit dtivol_0000.nii.gz tmp_ -z
+NUM_SLICES=0
+for count in `ls | grep tmp_`; do
+  ((NUM_SLICES++))
+done
+rm tmp*
+
+# Writting results in table
+# Table heading
+echo `ls dtivol* | cut -c1-11` > $TABLE.csv
+
+# Split slices for each volume
+for vol in `ls | grep dtivol_`; do
+  echo "  -> Spliting slices from volume $vol"
+  fslsplit $vol ${vol%.*.*}_slice_ -z
+done
+
+for (( slice = 0; slice < $NUM_SLICES; slice++ )); do
+  echo "    --> Slice $slice calculation..."
+        for (( volumeidx = 0; volumeidx < 10; volumeidx++ )); do
+          if [[ $slice -lt 10 ]]; then
+            img_aux=`ls dtivol_000${volumeidx}_slice_000${slice}*`
+            printf "`fslstats $img_aux -M` " >> $TABLE.csv
+          elif [[ $slice -ge 10 && $slice -lt 100 ]]; then
+            img_aux=`ls dtivol_000${volumeidx}_slice_00${slice}*`
+            printf "`fslstats $img_aux -M` " >> $TABLE.csv
+          elif [[ $slice -ge 100 && $slice -lt 1000 ]]; then
+            img_aux=`ls dtivol_000${volumeidx}_slice_0${slice}*`
+            printf "`fslstats $img_aux -M` " >> $TABLE.csv
+          fi
+        done
+
+        if [[ $NUM_VOLS -lt 100 ]]; then
+          for (( volumeidx = 10; volumeidx < $NUM_VOLS; volumeidx++ )); do
+            if [[ $slice -lt 10 ]]; then
+              img_aux=`ls dtivol_00${volumeidx}_slice_000${slice}*`
+              printf "`fslstats $img_aux -M` " >> $TABLE.csv
+            elif [[ $slice -ge 10 && $slice -lt 100 ]]; then
+              img_aux=`ls dtivol_00${volumeidx}_slice_00${slice}*`
+              printf "`fslstats $img_aux -M` " >> $TABLE.csv
+            elif [[ $slice -ge 100 && $slice -lt 1000 ]]; then
+              img_aux=`ls dtivol_00${volumeidx}_slice_0${slice}*`
+              printf "`fslstats $img_aux -M` " >> $TABLE.csv
+            fi
+          done
+          printf "\n" >> $TABLE.csv
+        else
+          for (( volumeidx = 10; volumeidx < 100; volumeidx++ )); do
+            if [[ $slice -lt 10 ]]; then
+              img_aux=`ls dtivol_00${volumeidx}_slice_000${slice}*`
+              printf "`fslstats $img_aux -M` " >> $TABLE.csv
+            elif [[ $slice -ge 10 && $slice -lt 100 ]]; then
+              img_aux=`ls dtivol_00${volumeidx}_slice_00${slice}*`
+              printf "`fslstats $img_aux -M` " >> $TABLE.csv
+            elif [[ $slice -ge 100 && $slice -lt 1000 ]]; then
+              img_aux=`ls dtivol_00${volumeidx}_slice_0${slice}*`
+              printf "`fslstats $img_aux -M` " >> $TABLE.csv
+            fi
+          done
+          for (( volumeidx = 100; volumeidx < $NUM_VOLS; volumeidx++ )); do
+            if [[ $slice -lt 10 ]]; then
+              img_aux=`ls dtivol_0${volumeidx}_slice_000${slice}*`
+              printf "`fslstats $img_aux -M` " >> $TABLE.csv
+            elif [[ $slice -ge 10 && $slice -lt 100 ]]; then
+              img_aux=`ls dtivol_0${volumeidx}_slice_00${slice}*`
+              printf "`fslstats $img_aux -M` " >> $TABLE.csv
+            elif [[ $slice -ge 100 && $slice -lt 1000 ]]; then
+              img_aux=`ls dtivol_0${volumeidx}_slice_0${slice}*`
+              printf "`fslstats $img_aux -M` " >> $TABLE.csv
+            fi
+          done
+          printf "\n" >> $TABLE.csv
+        fi
+done
+
+# Removing trash files
+rm dtivol*
