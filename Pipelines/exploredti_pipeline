@@ -7,23 +7,47 @@ T1_VOL=$3
 
 IMAGE_MAINPATH=$(dirname ${DTI_VOL})
 MAIN_FOLDER=$(basename ${DTI_VOL%.*.*})
+PATTERN_FOLDER="PHANTOM_b3000"
 
 #Creating folder to this specific experiment
-mkdir ${MAIN_PATH}/nandata/$(basename ${DTI_VOL%.*.*})
+if [[ `ls ${MAIN_PATH}/nandata` == "" ]]; then
+  if [[ `echo $MAIN_FOLDER | grep 1000` != "" ]]; then
+    mkdir ${MAIN_PATH}/nandata/PHANTOM_b1000
+	PATTERN_FOLDER="PHANTOM_b1000"
+  elif [[ `echo $MAIN_FOLDER | grep 2000` != "" ]]; then
+    mkdir ${MAIN_PATH}/nandata/PHANTOM_b2000
+    PATTERN_FOLDER="PHANTOM_b2000"
+  elif [[ `echo $MAIN_FOLDER | grep 3000` != "" ]]; then
+    mkdir ${MAIN_PATH}/nandata/PHANTOM_b3000
+    PATTERN_FOLDER="PHANTOM_b3000"
+  fi
+else
+  rm -R ${MAIN_PATH}/nandata/*
+  if [[ `echo $MAIN_FOLDER | grep 1000` != "" ]]; then
+    mkdir ${MAIN_PATH}/nandata/PHANTOM_b1000
+    PATTERN_FOLDER="PHANTOM_b1000"
+  elif [[ `echo $MAIN_FOLDER | grep 2000` != "" ]]; then
+    mkdir ${MAIN_PATH}/nandata/PHANTOM_b2000
+    PATTERN_FOLDER="PHANTOM_b2000"
+  elif [[ `echo $MAIN_FOLDER | grep 3000` != "" ]]; then
+    mkdir ${MAIN_PATH}/nandata/PHANTOM_b3000
+    PATTERN_FOLDER="PHANTOM_b3000"
+  fi
+fi
 
 echo "  ==> getnandata: Copying DTI and T1 to /nandata "
-cp ${DTI_VOL} $MAIN_PATH/nandata/$MAIN_FOLDER
-cp $IMAGE_MAINPATH/$(basename ${DTI_VOL%.*.*}).bval $MAIN_PATH/nandata/$MAIN_FOLDER
-cp $IMAGE_MAINPATH/$(basename ${DTI_VOL%.*.*}).bvec $MAIN_PATH/nandata/$MAIN_FOLDER
-cp $T1_VOL $MAIN_PATH/nandata/$MAIN_FOLDER
+cp ${DTI_VOL} $MAIN_PATH/nandata/$PATTERN_FOLDER
+cp $IMAGE_MAINPATH/$(basename ${DTI_VOL%.*.*}).bval $MAIN_PATH/nandata/$PATTERN_FOLDER
+cp $IMAGE_MAINPATH/$(basename ${DTI_VOL%.*.*}).bvec $MAIN_PATH/nandata/$PATTERN_FOLDER
+cp $T1_VOL $MAIN_PATH/nandata/$PATTERN_FOLDER
 
 echo "  ==> prepdti: Preparing DTI data to /dwidata "
-prepdti ${MAIN_PATH}/nandata ${MAIN_PATH}/dwidata $MAIN_FOLDER HCP
+prepdti ${MAIN_PATH}/nandata ${MAIN_PATH}/dwidata $PATTERN_FOLDER HCP
 
 echo "  ==> prept1: Preparing T1 data to /dwidata "
-prept1 -r MNI_2mm ${MAIN_PATH}/nandata ${MAIN_PATH}/dwidata $MAIN_FOLDER MPRAGE
+prept1 -r MNI_2mm ${MAIN_PATH}/nandata ${MAIN_PATH}/dwidata $PATTERN_FOLDER MPRAGE
 
 echo "  ==> expdticorr: Running the eddy correction procedure "
-expdticorr -a -R -M -C -E ${MAIN_PATH}/dwidata ${MAIN_PATH}/expdtidata $MAIN_FOLDER _expDTI
+expdticorr -a -R -M -C -E ${MAIN_PATH}/dwidata ${MAIN_PATH}/expdtidata $PATTERN_FOLDER _expDTI
 
 #CHAMAR METODO PARA CALCULAR MELHORA DA CORRECAO...IMAGEM RESIDUAL E METRICAS EM CIMA DISSO
