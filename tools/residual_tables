@@ -1,6 +1,6 @@
 #!/bin/bash
 # Script to calculate the residual values for each slice in each volume of DTI data.
-
+# TODO Reorganizar o modo como eh feita a tabela. Fazer em funcao do volume inteiro e nao dos slices.
 usage(){
   echo "  Script to calculate the residual values for each slice in each volume of DTI data."
   echo "  The results table is placed in the current directory location."
