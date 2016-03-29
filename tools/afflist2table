@@ -1,0 +1,82 @@
+#!/bin/bash
+# Script to build the affine table from a eddy_correct ecclog file type.
+
+usage(){
+  echo "  Script to build the affine table from a eddy_correct ecclog file type. "
+  echo "  The output is a table organized for each transformation dimension: tx ty tz Rx Ry Rz sx sy sz scx scy scz "
+  echo "  Where, t is Translation, R is rotation, s is skew and sc is scale in the axis x, y and z."
+  echo "  Usage: $(basename $0) <Matrix file (.mat)>"
+  echo ""
+  echo "   Matrix file    = A textfile which informs a list of 4x4 affine matrix. Use FSL-eddy-correct ecclog file."
+  echo ""
+}
+
+if [[ $# -lt 1 ]]; then
+  usage
+  exit
+fi
+
+if [[ `which fsl` == "" ]]; then
+  echo "  Error: FSL is missing! Please intall FSL packages before using this script."
+  exit
+fi
+
+if [[ `which matlab` == "" ]]; then
+  echo "  Error: Matlab is missing! Please intall Matlab before using this script."
+  exit
+fi
+
+MATRIX=$1
+MAIN_PATH=$(dirname $MATRIX)
+
+if [[ "`cat $MATRIX | grep -v processing | grep -v Final | grep [[:alnum:]]`" == "" ]]; then
+  echo "  --> File is clear from non numerical data...following the procedure"
+  cat $MATRIX > ${MAIN_PATH}/affine_4D.mat
+else
+  echo "Reformating affine output .mat file..."
+  cat $MATRIX | grep -v processing | grep -v Final | grep [[:alnum:]] > ${MAIN_PATH}/affine_4D.mat
+fi
+
+echo -e "\nSpliting to each volume matrix transformation..."
+matlab nohup -nodesktop -nodisplay -nosplash << EOF
+table=load('${MAIN_PATH}/affine_4D.mat','-ascii');
+
+rows=length(table);
+out_table=zeros(4,4);
+count=0;
+for i=1:4:rows
+  if count < 10
+        out_table=table(1*i:1*(i+3),:);
+        save(sprintf('${MAIN_PATH}/aff_000%d.mat',count),'out_table','-ascii');
+        count=count+1;
+      elseif (count < 100) && (count >= 10)
+        out_table=table(1*i:1*(i+3),:);
+        save(sprintf('${MAIN_PATH}/aff_00%d.mat',count),'out_table','-ascii');
+        count=count+1;
+      elseif (count < 1000) && (count >= 100)
+        out_table=table(1*i:1*(i+3),:);
+        save(sprintf('${MAIN_PATH}/aff_0%d.mat',count),'out_table','-ascii');
+        count=count+1;
+      end
+end
+EOF
+echo ""
+echo -e "\nMounting the final table affine transformation..."
+echo "tx ty tz Rx Ry Rz sx sy sz scx scy scz" > ${MAIN_PATH}/affine_table.csv
+
+rowline=""
+for n in `ls ${MAIN_PATH} | grep aff_`; do
+  # Translations values
+  rowline="$rowline`avscale --allparams ${MAIN_PATH}/${n} | grep "Translations" | cut -c29-100`"
+  # Rotation values
+  rowline="$rowline`avscale --allparams ${MAIN_PATH}/${n} | grep "Rotation Angles" | cut -c34-100`"
+  #Shear values
+  rowline="$rowline`avscale --allparams ${MAIN_PATH}/${n} | grep "Skews" | cut -c20-100`"
+  #Scales values
+  rowline="$rowline`avscale --allparams ${MAIN_PATH}/${n} | grep "Scales" | cut -c18-100`"
+  echo "$rowline" >> ${MAIN_PATH}/affine_table.csv
+  rowline=""
+done
+
+echo "Cleaning the trash files..."
+rm ${MAIN_PATH}/aff_* ${MAIN_PATH}/affine_4D*
