@@ -1,0 +1,20 @@
+#!/bin/bash
+# Script to create a affine list file from the ExploreDTI transformation file.
+
+usage(){
+  echo "  Script to create a affine list file from the TORTOISE transformation file."
+  echo "  Usage: $(basename $0) <ExploreDTI matrix file>"
+  echo ""
+  echo "   ExploreDTI matrix file  = The ExploreDTI output file related with the registration information. Usually the * file."
+  echo ""
+}
+
+TORT_FILE=$1
+MAIN_PATH=$(dirname $TORT_FILE)
+
+if [[ $# -lt 1 ]]; then
+  usage
+  exit
+fi
+
+#TODO Ver se ExploreDTI pode mostrar as tabelas de transformacao do coregistro. Similar ao que foi dado pelo TORTOISE

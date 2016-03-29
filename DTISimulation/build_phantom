@@ -1,13 +1,12 @@
 #!/bin/bash
 # Script to split the DTI volume and apply a deformation motion artifact from a .mat file (eddy_correct)
+#TODO Testar addpath no matlab de forma generica com pwd
 
 usage(){
   echo "  Script to apply a eddy current distortion in a DTI data."
-  echo "  Usage: build_phantom <Input image> <Bval file> <Bvec file> <Distortion matrix> <Number of B0> <Spatial resolution (mm)>"
+  echo "  Usage: build_phantom <Input image> <Distortion matrix> <Number of B0> <Spatial resolution (mm)>"
   echo ""
   echo "   Input image          = The DTI volume which you want to apply eddy current distortions."
-  echo "   Bval file            = Bval file from the input image (.bval)."
-  echo "   Bvec file            = Bvec file from the input image (.bvec)."
   echo "   Distortion matrix    = A textfile which informs a 4x4 affine matrix in order to apply in each volume of the DTI input data. Tip: Use FSL-eddy-correct ecclog file."
   echo "   Number of B0         = Inform how many B0 volumes your output DTI data should have."
   echo "   Spatial resolution   = Choose a desirable final spatial resolution to your data. For instance, 2 mm."
@@ -17,17 +16,35 @@ usage(){
 if [[ $# -eq 0 ]]; then
   usage
   exit
-elif [[ $# -lt 6 ]]; then
+elif [[ $# -lt 4 ]]; then
   usage
   exit
 fi
 
 INPUT_IMG=$1
-BVAL=$2
-BVEC=$3
-MATRIX=$4
-NUM_B0=$5
-RESOLUTION=$6
+if [[ "`echo $(basename ${INPUT_IMG##*.})`" == "gz" ]]; then
+  BVAL="$(dirname $INPUT_IMG)/$(basename ${INPUT_IMG%.*.*}).bval"
+  BVEC="$(dirname $INPUT_IMG)/$(basename ${INPUT_IMG%.*.*}).bvec"
+elif [[ "`echo $(basename ${INPUT_IMG##*.})`" == "nii" ]]; then
+  BVAL="$(dirname $INPUT_IMG)/$(basename ${INPUT_IMG%.*}).bval"
+  BVEC="$(dirname $INPUT_IMG)/$(basename ${INPUT_IMG%.*}).bvec"
+fi
+
+#Check if bvec and bval files exist
+if [[ ! -e $BVAL ]]; then
+  echo "  Bval file does not exist in the folder!"
+  echo "  Set the filename of the bval and bvec files with the same filename as the input file."
+  exit
+elif [[ ! -e $BVEC ]]; then
+  echo "  Bvec file does not exist in the folder!"
+  echo "  Set the filename of the bval and bvec files with the same filename as the input file."
+  exit
+fi
+
+
+MATRIX=$2
+NUM_B0=$3
+RESOLUTION=$4
 
 if [[ "`ls ~ | grep tmp_multishell`" == "" ]]; then
   mkdir ~/tmp_multishell
@@ -35,7 +52,13 @@ fi
 TMP_PATH="`echo ~`/tmp_multishell/"
 FILEPATH=$(dirname $INPUT_IMG)
 FILENAME=$(basename ${INPUT_IMG})
-FILENAME=${FILENAME%.*}
+FILENAME=""
+if [[ "echo ${INPUT_IMG##*.}" == "gz" ]]; then
+  gzip -d $INPUT_IMG
+  FILENAME=$(basename ${INPUT_IMG%.*})
+else
+  FILENAME=$(basename ${INPUT_IMG%.*})
+fi
 
 echo ""
 echo "***** Phantom reconstruction *****"
@@ -57,7 +80,7 @@ echo ""
 # Downsample to 2mm spatial resolution
 echo "    ==> Downsampling the data to $RESOLUTION mm..."
   INPUT_IMG="${TMP_PATH}tmp_resamp.nii"
-flirt -in ${INPUT_IMG} -ref ${INPUT_IMG} -out ${TMP_PATH}tmp_dti_${RESOLUTION}mm.nii -applyisoxfm $RESOLUTION
+flirt -in ${INPUT_IMG} -ref ${INPUT_IMG} -out ${TMP_PATH}tmp_dti_${RESOLUTION}mm.nii -interp spline -applyisoxfm $RESOLUTION
 
 # Decompress the 2 mm image
  gzip -d "${TMP_PATH}tmp_dti_${RESOLUTION}mm.nii.gz"

@@ -1,0 +1,64 @@
+#!/bin/bash
+# Script to create a affine list file from the TORTOISE transformation file.
+# TODO Testar script para ver se roda normalmente
+usage(){
+  echo "  Script to create a affine list file from the TORTOISE transformation file."
+  echo "  Usage: $(basename $0) <TORTOISE matrix file>"
+  echo ""
+  echo "   TORTOISE matrix file  = The TORTOISE output file related with the registration information. Usually the *_rpd.transformations file."
+  echo ""
+}
+
+TORT_FILE=$1
+MAIN_PATH=$(dirname $TORT_FILE)
+
+if [[ $# -lt 1 ]]; then
+  usage
+  exit
+fi
+
+# rpd.transformations list of transformations (scale maintain constant due to lack of information):
+# tx ty tz Rx Ry Rz sx sy sz 1 1 1
+echo "Extracting transformation info from file $(basename $TORT_FILE)..."
+NUM_VOLS=0
+while read line; do
+((NUM_VOLS++))
+done < $TORT_FILE
+
+for (( vol = 1; vol <= $NUM_VOLS; vol++ )); do
+  echo "  --> Volume $vol data extraction..."
+  trans=`sed -n '${vol}p' $TORT_FILE | awk '{print $1, $2, $3}'`
+  rot=`sed -n '${vol}p' $TORT_FILE | awk '{print $4, $5, $6}'`
+  scale="1 1 1"
+  echo "Creating FSL matrix .mat file with T = $trans ; R = $rot ; S = $scale "
+  if [[ $vol -lt 10 ]]; then
+      matlab nohup -nodesktop -nodisplay -nosplash << EOF
+      addpath(genpath('/home/k1510868/Documents/multishell/'));
+      addpath(genpath('/home/antonio/Documents/GitProjects/multishell'));
+
+      makeFslXfmMatrix([$trans],[$rot],[$scale],'${MAIN_PATH}/aff_000${vol}.mat');
+
+      EOF
+    elif [[ $vol -ge 10 && $vol -lt 100 ]]; then
+      matlab nohup -nodesktop -nodisplay -nosplash << EOF
+      addpath(genpath('/home/k1510868/Documents/multishell/'));
+      addpath(genpath('/home/antonio/Documents/GitProjects/multishell'));
+
+      makeFslXfmMatrix([$trans],[$rot],[$scale],'${MAIN_PATH}/aff_00${vol}.mat');
+
+      EOF
+    elif [[ $vol -ge 100 && $vol -lt 1000 ]]; then
+      matlab nohup -nodesktop -nodisplay -nosplash << EOF
+      addpath(genpath('/home/k1510868/Documents/multishell/'));
+      addpath(genpath('/home/antonio/Documents/GitProjects/multishell'));
+
+      makeFslXfmMatrix([$trans],[$rot],[$scale],'${MAIN_PATH}/aff_0${vol}.mat');
+
+      EOF
+    fi
+done
+
+echo "Creating the FSL affine matrix list file..."
+for i in `ls $MAIN_PATH | grep aff_`; do
+  cat $i >> ${MAIN_PATH}/afflist_tortoise.ecclog
+done

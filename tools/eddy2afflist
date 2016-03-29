@@ -1,0 +1,18 @@
+#!/bin/bash
+# Script to create a affine list file from the Eddy transformation file.
+# TODO Terminar de fazer o script ...ver arquivo de saida do Eddy para fazer a montagem como feito no TORTOISE
+usage(){
+  echo "  Script to create a affine list file from the Eddy transformation file."
+  echo "  Usage: $(basename $0) <Eddy matrix file>"
+  echo ""
+  echo "   Eddy matrix file  = The TORTOISE output file related with the registration information. Usually the * file."
+  echo ""
+}
+
+EDDY_FILE=$1
+MAIN_PATH=$(dirname $EDDY_FILE)
+
+if [[ $# -lt 1 ]]; then
+  usage
+  exit
+fi
