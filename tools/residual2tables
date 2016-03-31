@@ -1,0 +1,37 @@
+#!/bin/bash
+# Script to calculate the residual values for each slice in each volume of DTI data.
+# TODO Reorganizar o modo como eh feita a tabela. Fazer em funcao do volume inteiro e nao dos slices.
+usage(){
+  echo "  Script to calculate the residual values for each volume of DTI data."
+  echo "  The results table is placed in the current directory location."
+  echo "    Usage: $(basename $0) <DTI volume> <Name of table>"
+  echo ""
+}
+
+if [[ $# -lt 2 ]]; then
+  usage
+  exit
+fi
+
+# Usually, ~/DTI_STUDY/results/residual
+DTI_DATA=$1
+TABLE=$2
+
+# Split the data in 3D volumes
+echo "Spliting data in 3D volumes"
+fslsplit $DTI_DATA dtivol_ -t
+
+echo "Calculating the residual table..."
+# Writting results in table
+# Table heading
+echo "Volume Mean-NonZero Mean Std-NonZero Std" > $TABLE.csv
+for volume in `ls dtivol*`; do
+  printf "${volume%.*.*} " >> $TABLE.csv
+    printf "`fslstats $volume -M` " >> $TABLE.csv
+    printf "`fslstats $volume -m` " >> $TABLE.csv
+    printf "`fslstats $volume -S` " >> $TABLE.csv
+    printf "`fslstats $volume -s`\n" >> $TABLE.csv
+done
+
+# Removing trash files
+rm dtivol*

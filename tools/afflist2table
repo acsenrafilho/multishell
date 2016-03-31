@@ -1,13 +1,13 @@
 #!/bin/bash
-# Script to build the affine table from a eddy_correct ecclog file type.
+# Script to build the affine table from a ecclog file type.
 
 usage(){
-  echo "  Script to build the affine table from a eddy_correct ecclog file type. "
+  echo "  Script to build the affine table from a ecclog file type. "
   echo "  The output is a table organized for each transformation dimension: tx ty tz Rx Ry Rz sx sy sz scx scy scz "
   echo "  Where, t is Translation, R is rotation, s is skew and sc is scale in the axis x, y and z."
   echo "  Usage: $(basename $0) <Matrix file (.mat)>"
   echo ""
-  echo "   Matrix file    = A textfile which informs a list of 4x4 affine matrix. Use FSL-eddy-correct ecclog file."
+  echo "   Matrix file    = A textfile which informs a list of 4x4 affine matrix. Use scripts <METHOD>2afflist to generate the ecclog file."
   echo ""
 }
 

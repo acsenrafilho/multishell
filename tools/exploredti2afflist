@@ -1,6 +1,6 @@
 #!/bin/bash
 # Script to create a affine list file from the ExploreDTI transformation file.
-
+# TODO Terminar de editar este script para o arquivo de transformacao do ExploreDTI...ver pasta previous_input
 usage(){
   echo "  Script to create a affine list file from the TORTOISE transformation file."
   echo "  Usage: $(basename $0) <ExploreDTI matrix file>"
@@ -9,12 +9,57 @@ usage(){
   echo ""
 }
 
-TORT_FILE=$1
-MAIN_PATH=$(dirname $TORT_FILE)
+EXP_FILE=$1
+MAIN_PATH=$(dirname $EXP_FILE)
 
+# Check the number of input parameters
 if [[ $# -lt 1 ]]; then
   usage
   exit
 fi
 
-#TODO Ver se ExploreDTI pode mostrar as tabelas de transformacao do coregistro. Similar ao que foi dado pelo TORTOISE
+#
+# # rpd.transformations list of transformations (scale maintain constant due to lack of information):
+# # tx ty tz Rx Ry Rz sx sy sz 1 1 1
+# echo "Extracting transformation info from file $(basename $EDDY_FILE)..."
+# NUM_VOLS=0
+# while read line; do
+# ((NUM_VOLS++))
+# done < $EDDY_FILE
+#
+# echo "Extracting transformation info from file $(basename $EDDY_FILE)..."
+# matlab nohup -nodesktop -nodisplay -nosplash << EOF
+# addpath(genpath('/home/k1510868/Documents/multishell/'));
+# addpath(genpath('/home/antonio/Documents/GitProjects/multishell'));
+#
+# %Table with the transformations values
+# table=dlmread('$EDDY_FILE');
+#
+# %Run along each Volume
+# for vol=1:length(table)
+#   if vol < 10
+#     trans=[table(vol,1) table(vol,2) table(vol,3)];
+#     rot=[table(vol,4) table(vol,5) table(vol,6)];
+#     scale=[1 1 1];
+#     makeFslXfmMatrix(trans,rot,scale,strcat('${MAIN_PATH}/aff_000',num2str(vol),'.mat'));
+#   elseif vol >= 10 && vol < 100
+#     trans=[table(vol,1) table(vol,2) table(vol,3)];
+#     rot=[table(vol,4) table(vol,5) table(vol,6)];
+#     scale=[1 1 1];
+#     makeFslXfmMatrix(trans,rot,scale,strcat('${MAIN_PATH}/aff_00',num2str(vol),'.mat'));
+#   elseif vol >= 100 && vol < 1000
+#     trans=[table(vol,1) table(vol,2) table(vol,3)];
+#     rot=[table(vol,4) table(vol,5) table(vol,6)];
+#     scale=[1 1 1];
+#     makeFslXfmMatrix(trans,rot,scale,strcat('${MAIN_PATH}/aff_0',num2str(vol),'.mat'));
+#   end
+# end
+# EOF
+# echo ""
+# echo "Creating the FSL affine matrix list file..."
+# for i in `ls $MAIN_PATH | grep aff_`; do
+#   cat ${MAIN_PATH}/$i >> ${MAIN_PATH}/afflist_eddy.ecclog
+# done
+#
+# echo "Removing trash files..."
+# rm ${MAIN_PATH}/aff_*

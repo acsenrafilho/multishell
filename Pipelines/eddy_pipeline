@@ -1,5 +1,5 @@
 #!/bin/bash
-# Script to perform the ExploreDTI pipeline
+# Script to perform the Eddy pipeline
 
 MAIN_PATH=$1
 DTI_VOL=$2
@@ -14,7 +14,7 @@ IMAGE_NAME=$(basename ${DTI_VOL%.*.*})
 
   echo "  ==> Running EDDY"
   echo ""
- 
+
   #Setting the input variables to FSL-Eddy
   INPUT_IMG="$MAIN_PATH/${IMAGE_NAME}.nii.gz"
   BRAIN_MASK="$MAIN_PATH/${IMAGE_NAME}_brain_mask.nii.gz"
@@ -56,5 +56,3 @@ IMAGE_NAME=$(basename ${DTI_VOL%.*.*})
   # Running FSL-EDDY
 	echo "      --> FSL-EDDY"
   eddy --imain=$INPUT_IMG --mask=$BRAIN_MASK --index=$MAIN_PATH/eddy_index.txt --acqp=$MAIN_PATH/acqparam_${IMAGE_NAME}.txt --bvecs=$BVEC --bvals=$BVAL --out=$OUTPUT_IMG
-
-

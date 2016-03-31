@@ -1,22 +1,20 @@
 #!/bin/bash
 # Script to split the DTI volume and apply a deformation motion artifact from a .mat file (eddy_correct)
 #TODO Testar addpath no matlab de forma generica com pwd
+#TODO If the resolution choosen is the same as the original data, the resample step is not used.
 
 usage(){
   echo "  Script to apply a eddy current distortion in a DTI data."
-  echo "  Usage: build_phantom <Input image> <Distortion matrix> <Number of B0> <Spatial resolution (mm)>"
+  echo "  Usage: $(basename $0) <Input image> <Distortion matrix> <Number of B0> <Spatial resolution (mm)>"
   echo ""
   echo "   Input image          = The DTI volume which you want to apply eddy current distortions."
-  echo "   Distortion matrix    = A textfile which informs a 4x4 affine matrix in order to apply in each volume of the DTI input data. Tip: Use FSL-eddy-correct ecclog file."
+  echo "   Distortion matrix    = A textfile which informs a N*(4x4) affine matrix in order to apply in each volume of the DTI input data. Tip: Use tools/<METHOD>2afflist to generate the ecclog file."
   echo "   Number of B0         = Inform how many B0 volumes your output DTI data should have."
-  echo "   Spatial resolution   = Choose a desirable final spatial resolution to your data. For instance, 2 mm."
+  echo "   Spatial resolution   = Choose a desirable output spatial resolution to your data. For instance, 2 mm."
   echo ""
 }
 
-if [[ $# -eq 0 ]]; then
-  usage
-  exit
-elif [[ $# -lt 4 ]]; then
+if [[ $# -lt 4 ]]; then
   usage
   exit
 fi
@@ -77,9 +75,9 @@ matlab nohup -nodesktop -nodisplay -nosplash << EOF
 EOF
 
 echo ""
-# Downsample to 2mm spatial resolution
+# Downsample to the required spatial resolution
 echo "    ==> Downsampling the data to $RESOLUTION mm..."
-  INPUT_IMG="${TMP_PATH}tmp_resamp.nii"
+INPUT_IMG="${TMP_PATH}tmp_resamp.nii"
 flirt -in ${INPUT_IMG} -ref ${INPUT_IMG} -out ${TMP_PATH}tmp_dti_${RESOLUTION}mm.nii -interp spline -applyisoxfm $RESOLUTION
 
 # Decompress the 2 mm image
