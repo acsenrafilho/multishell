@@ -52,13 +52,13 @@ foreach image ( `ls $HOME/DTI_STUDY/Eddy | grep _eddy.nii.gz` )
   endif
 end
 
-# ExploreDTI TODO It is necessary to export the .mat file to .nii.gz volume ... See how to do it with command line
-# foreach image ( `ls $HOME/DTI_STUDY/ExploreDTI/expdtidata | grep _expDTI.nii.gz` )
-#   if ( "`echo $IMG | grep 1000`" != "" ) then
-#     fslmaths "$HOME/DTI_STUDY/Eddy/$image" -sub $REFERENCE_b1000 "$HOME/DTI_STUDY/residual/residual_eddy_b1000.nii.gz"
-#   else if ( "`echo $IMG | grep 2000`" != "" ) then
-#     fslmaths "$HOME/DTI_STUDY/Eddy/$image" -sub $REFERENCE_b2000 "$HOME/DTI_STUDY/residual/residual_eddy_b2000.nii.gz"
-#   else if ( "`echo $IMG | grep 3000`" != "" ) then
-#     fslmaths "$HOME/DTI_STUDY/Eddy/$image" -sub $REFERENCE_b3000 "$HOME/DTI_STUDY/residual/residual_eddy_b3000.nii.gz"
-#   endif
-# end
+# ExploreDTI
+foreach image ( `ls $HOME/DTI_STUDY/ExploreDTI/expdtidata | grep _expDTI.nii.gz` )
+  if ( "`echo $IMG | grep 1000`" != "" ) then
+    fslmaths "$HOME/DTI_STUDY/ExploreDTI/expdtidata/$image" -sub $REFERENCE_b1000 "$HOME/DTI_STUDY/results/residual/res_expDTI_b1000.nii.gz"
+  else if ( "`echo $IMG | grep 2000`" != "" ) then
+    fslmaths "$HOME/DTI_STUDY/ExploreDTI/expdtidata/$image" -sub $REFERENCE_b2000 "$HOME/DTI_STUDY/results/residual/res_expDTI_b2000.nii.gz"
+  else if ( "`echo $IMG | grep 3000`" != "" ) then
+    fslmaths "$HOME/DTI_STUDY/ExploreDTI/expdtidata/$image" -sub $REFERENCE_b3000 "$HOME/DTI_STUDY/results/residual/res_expDTI_b3000.nii.gz"
+  endif
+end
