@@ -49,5 +49,3 @@ prept1 -r MNI_2mm ${MAIN_PATH}/nandata ${MAIN_PATH}/dwidata $PATTERN_FOLDER MPRA
 
 echo "  ==> expdticorr: Running the eddy correction procedure "
 expdticorr -a -R -M -C -E ${MAIN_PATH}/dwidata ${MAIN_PATH}/expdtidata $PATTERN_FOLDER _expDTI
-
-#CHAMAR METODO PARA CALCULAR MELHORA DA CORRECAO...IMAGEM RESIDUAL E METRICAS EM CIMA DISSO

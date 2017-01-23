@@ -1,0 +1,48 @@
+#!/bin/bash
+# Script to apply AAD filtering process on multi-shell HARDI data
+usage(){
+  echo "Script to apply AAD filtering process on multi-shell HARDI data"
+  echo "  $(basename $0) <HARDI data> <Conductance> <NumIterations> <QValue>"
+  echo "  <HARDI data> = HARDI diffusion imaging dataset in .nii.gz format."
+  echo "  <Conductance> = Conductance of AAD filter ."
+  echo "  <NumIterations> = Number of iterations of AAD filter."
+  echo "  <QValue> = Q value of AAD filter."
+}
+
+if [[ $# -lt 4 ]]; then
+  usage
+  exit
+fi
+
+CURRENT_FOLDER=$PWD
+
+HARDI_DATA=$1
+FILTER=/home/antonio/Downloads/AADfilter-build/AADfilter
+CONDUCTANCE=$2
+NUMITER=$3
+QVALUE=$4
+
+# Creating temporary folder
+mkdir ~/tmp_spatial_filtering
+DATA_PATH=`echo ~`/tmp_spatial_filtering
+
+# Split HARDI in independent volumes
+echo "Step 1: Dataset splitting in independent volumes (total of ... volumes)"
+fslsplit $HARDI_DATA $DATA_PATH/tmp_vol_
+
+# Apply AAD filtering step
+echo "Step 2: Applying AAD filtering on diffusion data"
+for volume in `ls $DATA_PATH | grep tmp_vol`; do
+  echo -n "  -> Volume: `echo $volume | cut -c 9-20`"
+  $FILTER $DATA_PATH/$volume $DATA_PATH/$volume $CONDUCTANCE $QVALUE $NUMITER 0.0625
+  echo " - Done!\n"
+done
+
+# Merge diffusion data
+echo "Step 3: Merging filtered diffusion data"
+cd $DATA_PATH
+fslmerge -t $(dirname $HARDI_DATA)/$(basename ${HARDI_DATA%.*.*})_filtered.nii.gz `ls $DATA_PATH | grep tmp_vol`
+cd $CURRENT_FOLDER
+
+# Remove tmp folder
+rm -R $DATA_PATH
